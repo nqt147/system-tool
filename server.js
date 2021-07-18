@@ -12,9 +12,9 @@ const port = 3000;
 //passport config:
 require('./config/passport')(passport)
 //mongoose
-mongoose.connect('mongodb://devops:abc123@10.1.1.33:27017/devops_config',{useNewUrlParser: true, useUnifiedTopology : true})
-.then(() => console.log('connected,,'))
-.catch((err)=> console.log(err));
+// mongoose.connect('mongodb://devops:abc123@10.1.1.33:27017/devops_config',{useNewUrlParser: true, useUnifiedTopology : true})
+// .then(() => console.log('connected,,'))
+// .catch((err)=> console.log(err));
 
 //EJS
 app.set('views', path.join(__dirname, 'views'));

@@ -21,7 +21,7 @@
   <div class="wrapper">
     <%- include ('../layout/header') %>
       <%- include ('../layout/navbar') %>
-        <form method="GET" action="/users/login">
+        <form method="POST" action="/mysql">
           <div class="content-wrapper">
             <!-- Content Header (Page header) -->
             <section class="content-header">
@@ -63,7 +63,7 @@
                       <div class="col-md-6">
                         <div class="form-group">
                           <label>Cluster Database</label>
-                          <select class="form-control select2" style="width: 100%;">
+                          <select class="form-control select2" style="width: 100%;" id="clustername" name="clustername">
                             <option selected="selected">--- name ---</option>
                             <option>Util</option>
                             <option>Bank</option>
@@ -73,14 +73,12 @@
                         <!-- /.form-group -->
                         <div class="form-group">
                           <label>Table Name</label>
-                          <select class="form-control select2" style="width: 100%;">
-                            <option selected="selected">Alabama</option>
-                            <option>Alaska</option>
-                            <option>California</option>
-                            <option>Delaware</option>
-                            <option>Tennessee</option>
-                            <option>Texas</option>
-                            <option>Washington</option>
+                          <select class="form-control select2" style="width: 100%;" id="tablename" name="tablename" onchange="onChangeDNName(this)">
+                            <% infodb.tableName.forEach(function(name) { %>
+                              <option selected="selected">
+                                <%= name %>
+                              </option>
+                              <% }); %>
                           </select>
                         </div>
                         <!-- /.form-group -->
@@ -88,10 +86,10 @@
                       <div class="col-md-6">
                         <div class="form-group">
                           <label>DB Name</label>
-                          <select class="form-control select2" style="width: 100%;">
-                            <% links.forEach(function(link) { %>
+                          <select class="form-control select2" style="width: 100%;" id="dbname" name="dbname">
+                            <% infodb.dbName.forEach(function(name) { %>
                               <option selected="selected">
-                                <%= link.text %>
+                                <%= name %>
                               </option>
                               <% }); %>
                           </select>
@@ -138,7 +136,7 @@
                         <div class="form-group">
                           <div class="form-group">
                             <label>Inputs</label>
-                            <textarea class="form-control" rows="4" placeholder="Enter ..."></textarea>
+                            <textarea class="form-control" rows="4" placeholder="Enter ..." id="exequery" name="exequery"></textarea>
                           </div>
                           <div class="card-body">
                             <button type="submit" class="btn btn-primary float-right">Submit</button>
@@ -173,6 +171,12 @@
     <script src="dist/js/demo.js"></script>
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
     <script src="dist/js/pages/dashboard3.js"></script>
-</body>
+    <script src="../../event_change/eventChange.js" ></script>
+    <script>
+      function onChangeDNName(sel) {
+          var countNo = sel.value;
+          console.log("No of Device:" + sel.value);
+      }
+  </script>
 
 </html>

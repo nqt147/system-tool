@@ -4,7 +4,7 @@ const { ensureAuthenticated } = require('../config/auth')
 const https = require('https');
 const http = require('http');
 const request = require('request');
-
+let data = '';
 //login page
 router.get('/', (req, res) => {
     res.render('login');
@@ -20,34 +20,67 @@ router.get('/dashboard', ensureAuthenticated, (req, res) => {
     });
 })
 
-router.get('/mysql', ensureAuthenticated, (req, res) => {
-    let links = [
-        { href: 'http://recruit.framgia.vn/', text: 'sn_operation_tool' },
-        { href: 'https://www.facebook.com/FramgiaVietnam/', text: 'sn_reconciliation' },
-        { href: 'https://viblo.asia/', text: 'Viblo by Framgia' },
-        { href: '/', text: 'Text Link 1' },
-        { href: '/', text: 'Text Link 2' },
-        { href: '/', text: 'Text Link 3' },
-        { href: '/', text: 'sn_operation_tool' },
-    ];
+router.get('/mysql', (req, res) => {
+    http.get('http://localhost:2105/get_info_db/util', (resp) => {
+        resp.on('data', (chunk) => {
+            data += chunk;
+        });
+
+        // The whole response has been received. Print out the result.
+        resp.on('end', () => {
+            data = JSON.parse(data)
+            console.log(data);
+            res.render('mysqlpage/mysqlHome', { user: req.user, infodb: data });
+        });
+
+    }).on("error", (err) => {
+        console.log("Error: " + err.message);
+        res.render('mysqlpage/mysqlHome', { user: req.user });
+    });
+    console.log(data);
+})
+
+router.post('/mysql', (req, res) => {
+    const { clustername, dbname, tablename, exequery } = req.body;
+    let errors = [];
+    console.log(' clustername ' + clustername + ' dbname ' + dbname + ' tablename :' + tablename + ' exequery :' + exequery);
+
+    let dataReq = new TextEncoder().encode(
+        JSON.stringify({
+            clustername: clustername,
+            dbname: dbname,
+            tablename: tablename,
+            exequery: exequery
+        })
+    )
 
     let options = {
-        hostname: 'http://localhost:2105',
-        port: 80,
-        path: '/get_info_db/util',
-        method: 'GET'
+        host: 'localhost',
+        port: 2105,
+        path: '/mysql/update',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': dataReq.length
+        }
     }
 
-    http.request(options, function(res) {
-        console.log('STATUS: ' + res.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(res.headers));
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-          console.log('BODY: ' + chunk);
+    let reqq = http.request(options, function (ress) {
+        ress.setEncoding('utf8');
+        ress.on('data', function (chunk) {
+            console.log('BODY: ' + chunk);
+            data = JSON.parse(chunk)
+            res.render('mysqlpage/mysqlHome', { user: req.user, infodb: data });
         });
-      }).end();
+    });
 
-    res.render('mysqlpage/mysqlHome', { links: links, user: req.user });
+    reqq.on('error', function (e) {
+        console.log('problem with request: ' + e.message);
+        res.render('mysqlpage/mysqlHome', { user: req.user });
+    });
+    reqq.write(dataReq);
+    reqq.end();
 })
+
 
 module.exports = router;
