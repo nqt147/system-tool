@@ -45,14 +45,25 @@ router.post('/mysql', (req, res) => {
     let errors = [];
     console.log(' clustername ' + clustername + ' dbname ' + dbname + ' tablename :' + tablename + ' exequery :' + exequery);
 
+    // let dataReq = new TextEncoder().encode(
+    //     JSON.stringify({
+    //         clustername: clustername,
+    //         dbname: dbname,
+    //         tablename: tablename,
+    //         exequery: exequery
+    //     })
+    // );
+
     let dataReq = new TextEncoder().encode(
         JSON.stringify({
-            clustername: clustername,
-            dbname: dbname,
-            tablename: tablename,
-            exequery: exequery
+            infoQuery:{
+                clusterName:clustername,
+                dbName:dbname,
+                tableName:tablename,
+                queryExecute:exequery
+            }
         })
-    )
+    );
 
     let options = {
         host: 'localhost',
@@ -63,20 +74,20 @@ router.post('/mysql', (req, res) => {
             'Content-Type': 'application/json',
             'Content-Length': dataReq.length
         }
-    }
+    };
 
     let reqq = http.request(options, function (ress) {
         ress.setEncoding('utf8');
         ress.on('data', function (chunk) {
             console.log('BODY: ' + chunk);
             data = JSON.parse(chunk)
-            res.render('mysqlpage/mysqlHome', { user: req.user, infodb: data });
+            // res.render('mysqlpage/mysqlHome', { user: req.user, infodb: data });
         });
     });
 
     reqq.on('error', function (e) {
         console.log('problem with request: ' + e.message);
-        res.render('mysqlpage/mysqlHome', { user: req.user });
+        // res.render('mysqlpage/mysqlHome', { user: req.user });
     });
     reqq.write(dataReq);
     reqq.end();
